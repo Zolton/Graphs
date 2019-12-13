@@ -1,14 +1,18 @@
-
+import random
+from graph import Graph
 
 class User:
     def __init__(self, name):
         self.name = name
+    def __repr__(self):
+        return self.name
 
 class SocialGraph:
     def __init__(self):
         self.last_id = 0
         self.users = {}
         self.friendships = {}
+    graph = Graph()
 
     def add_friendship(self, user_id, friend_id):
         """
@@ -30,7 +34,7 @@ class SocialGraph:
         self.users[self.last_id] = User(name)
         self.friendships[self.last_id] = set()
 
-    def populate_graph(self, numUsers, avgFriendships):
+    def populate_graph(self, num_users, avg_friendships):
         """
         Takes a number of users and an average number of friendships
         as arguments
@@ -44,12 +48,37 @@ class SocialGraph:
         self.last_id = 0
         self.users = {}
         self.friendships = {}
-        # !!!! IMPLEMENT ME
 
         # Add users
+        for i in range(num_users):
+            self.add_user(f"User {i+1}")
 
-        # Create friendships
+        # Create list of all possible friendship combinations
 
+        possible_friendships = []
+        for user_id in self.users:
+            for friend_id in range(user_id + 1, self.last_id + 1):
+                possible_friendships.append((user_id, friend_id))
+        
+        # Shuffle list
+
+        random.shuffle(possible_friendships)
+
+        #print(possible_friendships)
+
+        #Grab first N elements from the list
+        # // = whole number returned, no floats
+
+        for i in range(num_users * avg_friendships // 2):
+            friendship = possible_friendships[i]
+            self.add_friendship(friendship[0], friendship[1])
+    
+    friendships2 = {1: {8, 10, 5}, 2: {10, 5, 7}, 3: {4}, 4: {9, 3}, 5: {8, 1, 2}, 6: {10}, 7: {2}, 8: {1, 5}, 9: {4}, 10: {1, 2, 6}}
+    #print("Full on friendship: ")
+    print(type(friendships2))
+    print(type(friendships2[1]))
+    for i in friendships2[1]:
+        print("i", i)
     def get_all_social_paths(self, user_id):
         """
         Takes a user's user_id as an argument
@@ -59,9 +88,19 @@ class SocialGraph:
 
         The key is the friend's ID and the value is the path.
         """
-        visited = {}  # Note that this is a dictionary, not a set
-        # !!!! IMPLEMENT ME
+        visited = {}
+        # 1) Find all nodes, enter into dictionary
+        self.graph.bft(user_id, self.friendships, visited)
+        # 2) Find shortest path from users_id to all nodes
+        for known_node in visited:
+            self.graph.bfs(user_id, known_node, self.friendships, visited)
+        print("Finished: ")
         return visited
+    
+    """
+        Better ancestor - get starter, find all possible endpoitns, then
+        use traversal algo to find all paths, and return the longest
+    """
 
 
 if __name__ == '__main__':
